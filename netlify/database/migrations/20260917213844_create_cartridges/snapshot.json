@@ -1,0 +1,157 @@
+{
+  "version": "8",
+  "dialect": "postgres",
+  "id": "727c4dab-bd47-45f3-b662-262fefe2fa4d",
+  "prevIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
+  "ddl": [
+    {
+      "isRlsEnabled": false,
+      "name": "cartridges",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "type": "serial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "cartridges"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "brand",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "cartridges"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "model",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "cartridges"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'N/A'",
+      "generated": null,
+      "identity": null,
+      "name": "color",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "cartridges"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "barcode",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "cartridges"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "''",
+      "generated": null,
+      "identity": null,
+      "name": "printers",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "cartridges"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "quantity",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "cartridges"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "1",
+      "generated": null,
+      "identity": null,
+      "name": "min_threshold",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "cartridges"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "cartridges"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "cartridges"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "cartridges_pkey",
+      "schema": "public",
+      "table": "cartridges",
+      "entityType": "pks"
+    }
+  ],
+  "renames": []
+}
