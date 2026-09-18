@@ -586,9 +586,11 @@ h1{
 </div>
 
 <script>
-const STORAGE_KEY = 'toner-items';
+const API = '/api/cartridges';
+const LEGACY_KEY = 'toner-items';
 let items = [];
 let loaded = false;
+let loadError = '';
 let activeFilter = 'all';
 let searchTerm = '';
 let editingId = null;
@@ -601,27 +603,78 @@ const COLOR_HEX = {
   'N/A': '#999'
 };
 
+function normalize(item){
+  return { ...item, id: String(item.id) };
+}
+
+async function apiRequest(url, options){
+  const res = await fetch(url, options);
+  if(!res.ok){
+    let msg = 'Request failed (' + res.status + ')';
+    try{
+      const body = await res.json();
+      if(body && body.error) msg = body.error;
+    }catch(e){ /* non-JSON error body */ }
+    throw new Error(msg);
+  }
+  if(res.status === 204) return null;
+  return res.json();
+}
+
 async function loadItems(){
+  loaded = false;
+  loadError = '';
+  render();
   try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    items = raw ? JSON.parse(raw) : [];
+    const data = await apiRequest(API);
+    items = Array.isArray(data) ? data.map(normalize) : [];
+    await importLegacyItems();
   }catch(e){
+    console.error('Load failed', e);
     items = [];
+    loadError = 'Could not reach the stock database. ' + e.message;
   }
   loaded = true;
   render();
 }
 
-async function saveItems(){
+async function importLegacyItems(){
+  if(items.length) return;
+  let legacy = [];
   try{
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    const raw = localStorage.getItem(LEGACY_KEY);
+    legacy = raw ? JSON.parse(raw) : [];
   }catch(e){
-    console.error('Save failed', e);
+    legacy = [];
   }
-}
+  if(!Array.isArray(legacy) || legacy.length === 0) return;
 
-function uid(){
-  return 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+  const imported = [];
+  for(const old of legacy){
+    try{
+      const created = normalize(await apiRequest(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brand: old.brand,
+          model: old.model,
+          color: old.color,
+          barcode: old.barcode,
+          printers: old.printers,
+          quantity: old.quantity,
+          minThreshold: old.minThreshold
+        })
+      }));
+      imported.push(created);
+    }catch(e){
+      console.error('Legacy import failed for', old && old.model, e);
+    }
+  }
+
+  if(imported.length){
+    items = imported;
+    try{ localStorage.removeItem(LEGACY_KEY); }catch(e){ /* ignore */ }
+  }
 }
 
 function statusOf(item){
@@ -656,6 +709,17 @@ function render(){
   const app = document.getElementById('app');
   if(!loaded){
     app.innerHTML = '<div class="loading">Loading stock…</div>';
+    return;
+  }
+
+  if(loadError){
+    app.innerHTML = `
+      <div class="empty">
+        <div class="big">Database not connected</div>
+        <div>${escapeHtml(loadError)}</div>
+        <div style="margin-top:14px"><button class="scan-btn" onclick="loadItems()">RETRY</button></div>
+      </div>
+    `;
     return;
   }
 
@@ -778,20 +842,39 @@ function setFilter(f){ activeFilter = f; render(); }
 function setSearch(v){ searchTerm = v; render(); }
 
 async function adjustQty(id, delta){
-  const item = items.find(i => i.id === id);
+  const item = items.find(i => i.id === String(id));
   if(!item) return;
-  item.quantity = Math.max(0, (Number(item.quantity)||0) + delta);
+  const prev = item.quantity;
+  const next = Math.max(0, (Number(prev)||0) + delta);
+  item.quantity = next;
   render();
-  await saveItems();
+  try{
+    const updated = normalize(await apiRequest(API + '/' + item.id, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ quantity: next })
+    }));
+    Object.assign(item, updated);
+    render();
+  }catch(e){
+    item.quantity = prev;
+    render();
+    alert('Could not update stock: ' + e.message);
+  }
 }
 
 async function deleteItem(id){
-  const item = items.find(i => i.id === id);
+  const item = items.find(i => i.id === String(id));
   if(!item) return;
   if(!confirm(`Delete ${item.brand} ${item.model}?`)) return;
-  items = items.filter(i => i.id !== id);
+  try{
+    await apiRequest(API + '/' + item.id, { method: 'DELETE' });
+  }catch(e){
+    alert('Could not delete: ' + e.message);
+    return;
+  }
+  items = items.filter(i => i.id !== item.id);
   render();
-  await saveItems();
 }
 
 function openModal(id, prefillBarcode){
@@ -875,17 +958,32 @@ async function saveItem(){
   const printers = document.getElementById('f-printers').value.trim();
   const quantity = Math.max(0, parseInt(document.getElementById('f-qty').value) || 0);
   const minThreshold = Math.max(0, parseInt(document.getElementById('f-min').value) || 0);
+  const payload = { brand, color, model, barcode, printers, quantity, minThreshold };
 
-  if(editingId){
-    const item = items.find(i => i.id === editingId);
-    Object.assign(item, { brand, color, model, barcode, printers, quantity, minThreshold });
-  } else {
-    items.push({ id: uid(), brand, color, model, barcode, printers, quantity, minThreshold });
+  try{
+    if(editingId){
+      const updated = normalize(await apiRequest(API + '/' + editingId, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }));
+      const idx = items.findIndex(i => i.id === String(editingId));
+      if(idx !== -1) items[idx] = updated; else items.push(updated);
+    } else {
+      const created = normalize(await apiRequest(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }));
+      items.push(created);
+    }
+  }catch(e){
+    alert('Could not save: ' + e.message);
+    return;
   }
 
   closeModal();
   render();
-  await saveItems();
 }
 
 /* ---------- barcode scanner ---------- */
@@ -1070,9 +1168,19 @@ async function handleScannedCode(code){
 
   if(existing){
     beep('match');
-    existing.quantity = (Number(existing.quantity)||0) + 1;
+    const next = (Number(existing.quantity)||0) + 1;
+    existing.quantity = next;
     scanHistory.push({ id: existing.id, brand: existing.brand, model: existing.model });
-    await saveItems();
+    try{
+      const updated = normalize(await apiRequest(API + '/' + existing.id, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity: next })
+      }));
+      Object.assign(existing, updated);
+    }catch(e){
+      setScanStatus('Could not save scan: ' + e.message, false);
+    }
     render();
     refreshTally();
     setScanStatus(`+1 ${existing.brand} ${existing.model} → now ${existing.quantity} in stock. Keep scanning…`, true);
@@ -1097,10 +1205,20 @@ async function handleScannedCode(code){
 async function undoLastScan(){
   if(!scanHistory.length) return;
   const last = scanHistory.pop();
-  const item = items.find(i => i.id === last.id);
+  const item = items.find(i => i.id === String(last.id));
   if(item){
-    item.quantity = Math.max(0, (Number(item.quantity)||0) - 1);
-    await saveItems();
+    const next = Math.max(0, (Number(item.quantity)||0) - 1);
+    item.quantity = next;
+    try{
+      const updated = normalize(await apiRequest(API + '/' + item.id, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity: next })
+      }));
+      Object.assign(item, updated);
+    }catch(e){
+      setScanStatus('Could not save undo: ' + e.message, false);
+    }
     render();
     beep('undo');
     setScanStatus(`Removed 1 ${last.brand} ${last.model} → now ${item.quantity}. Keep scanning…`, false);
