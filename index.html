@@ -587,7 +587,14 @@ h1{
 <script>
 const SUPABASE_URL = 'https://itfdphlhftknnuuarfud.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_Y7wGcxzIe22049DG1GYiUQ_ebSn63Q5';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabase = null;
+try {
+  if (!window.supabase) throw new Error('Supabase library did not load');
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch (e) {
+  console.error(e);
+  document.getElementById('app').innerHTML = '<div class="empty"><div class="big">App could not start</div><div>' + escapeHtml(e.message) + '</div><div style="margin-top:12px">Please refresh the page.</div></div>';
+}
 let items = [];
 let currentUser = null;
 let loaded = false;
@@ -604,14 +611,26 @@ const COLOR_HEX = {
 };
 
 async function loadItems(){
-  const { data: { user } } = await supabase.auth.getUser();
-  currentUser = user;
+  if(!supabase){ loaded=true; render(); return; }
+  try {
+    const result = await Promise.race([
+      supabase.auth.getUser(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Supabase connection timed out')), 10000))
+    ]);
+    const { data: { user } } = result;
+    currentUser = user;
   if(!user){ loaded = true; render(); return; }
   const { data, error } = await supabase.from('toner_items').select('*').order('brand').order('model');
   if(error){ console.error(error); alert('Could not load shared stock: ' + error.message); items = []; }
   else items = data || [];
-  loaded = true;
-  render();
+    loaded = true;
+    render();
+  } catch(e) {
+    console.error(e);
+    loaded = true;
+    currentUser = null;
+    document.getElementById('app').innerHTML = '<div class="empty"><div class="big">Database connection problem</div><div>' + escapeHtml(e.message) + '</div><div style="margin-top:12px"><button class="add-btn" onclick="location.reload()">RETRY</button></div></div>';
+  }
 }
 
 async function saveItems(){ return true; }
