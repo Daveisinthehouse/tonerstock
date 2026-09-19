@@ -594,7 +594,7 @@ try {
   supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 } catch (e) {
   console.error(e);
-  document.getElementById('app').innerHTML = '<div class="empty"><div class="big">App could not start</div><div>' + escapeHtml(e.message) + '</div><div style="margin-top:12px">Please refresh the page.</div></div>';
+  document.getElementById('app').innerHTML = '<div class="empty"><div class="big">App could not start</div><div>Supabase library failed to load.</div><div style="margin-top:12px">Please refresh the page.</div></div>';
 }
 let items = [];
 let currentUser = null;
