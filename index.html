@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Toner Stock</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
 
@@ -581,13 +582,14 @@ h1{
 </head>
 <body>
 
-<div class="wrap" id="app">
-  <div class="loading">Loading stock…</div>
-</div>
+<div class="wrap" id="app"><div class="loading">Loading stock…</div></div>
 
 <script>
-const STORAGE_KEY = 'toner-items';
+const SUPABASE_URL = 'https://itfdphlhftknnuuarfud.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_Y7wGcxzIe22049DG1GYiUQ_ebSn63Q5';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let items = [];
+let currentUser = null;
 let loaded = false;
 let activeFilter = 'all';
 let searchTerm = '';
@@ -602,23 +604,17 @@ const COLOR_HEX = {
 };
 
 async function loadItems(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    items = raw ? JSON.parse(raw) : [];
-  }catch(e){
-    items = [];
-  }
+  const { data: { user } } = await supabase.auth.getUser();
+  currentUser = user;
+  if(!user){ loaded = true; render(); return; }
+  const { data, error } = await supabase.from('toner_items').select('*').order('brand').order('model');
+  if(error){ console.error(error); alert('Could not load shared stock: ' + error.message); items = []; }
+  else items = data || [];
   loaded = true;
   render();
 }
 
-async function saveItems(){
-  try{
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }catch(e){
-    console.error('Save failed', e);
-  }
-}
+async function saveItems(){ return true; }
 
 function uid(){
   return 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
@@ -659,6 +655,7 @@ function render(){
     return;
   }
 
+  if(!currentUser){ app.innerHTML = renderLogin(); return; }
   const total = items.length;
   const lowCount = items.filter(i => statusOf(i) !== 'ok').length;
   const totalUnits = items.reduce((s,i) => s + (Number(i.quantity)||0), 0);
@@ -678,7 +675,9 @@ function render(){
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M4 12h16"/></svg>
           SCAN
         </button>
+        <button class="scan-btn" onclick="exportCSV()">CSV EXPORT</button>
         <button class="add-btn" onclick="openModal()">+ ADD CARTRIDGE</button>
+        <button class="scan-btn" onclick="signOut()">SIGN OUT</button>
       </div>
     </header>
 
@@ -780,18 +779,21 @@ function setSearch(v){ searchTerm = v; render(); }
 async function adjustQty(id, delta){
   const item = items.find(i => i.id === id);
   if(!item) return;
-  item.quantity = Math.max(0, (Number(item.quantity)||0) + delta);
+  const eventType = delta > 0 ? 'manual_add' : 'manual_remove';
+  const { data, error } = await supabase.rpc('adjust_toner_stock', {p_toner_id:id,p_delta:delta,p_event_type:eventType,p_barcode:item.barcode || null});
+  if(error){ alert(error.message); return; }
+  Object.assign(item, data);
   render();
-  await saveItems();
 }
 
 async function deleteItem(id){
   const item = items.find(i => i.id === id);
   if(!item) return;
   if(!confirm(`Delete ${item.brand} ${item.model}?`)) return;
+  const { error } = await supabase.from('toner_items').delete().eq('id', id);
+  if(error){ alert(error.message); return; }
   items = items.filter(i => i.id !== id);
   render();
-  await saveItems();
 }
 
 function openModal(id, prefillBarcode){
@@ -865,27 +867,26 @@ function closeModal(){
 
 async function saveItem(){
   const model = document.getElementById('f-model').value.trim();
-  if(!model){
-    alert('Enter a model or part number.');
-    return;
-  }
-  const brand = document.getElementById('f-brand').value;
-  const color = document.getElementById('f-color').value;
-  const barcode = document.getElementById('f-barcode').value.trim();
-  const printers = document.getElementById('f-printers').value.trim();
-  const quantity = Math.max(0, parseInt(document.getElementById('f-qty').value) || 0);
-  const minThreshold = Math.max(0, parseInt(document.getElementById('f-min').value) || 0);
-
+  if(!model){ alert('Enter a model or part number.'); return; }
+  const payload = {
+    brand: document.getElementById('f-brand').value,
+    color: document.getElementById('f-color').value,
+    model,
+    barcode: document.getElementById('f-barcode').value.trim() || null,
+    printers: document.getElementById('f-printers').value.trim(),
+    quantity: Math.max(0, parseInt(document.getElementById('f-qty').value) || 0),
+    min_threshold: Math.max(0, parseInt(document.getElementById('f-min').value) || 0)
+  };
+  let error, data;
   if(editingId){
-    const item = items.find(i => i.id === editingId);
-    Object.assign(item, { brand, color, model, barcode, printers, quantity, minThreshold });
+    ({data:[data], error} = await supabase.from('toner_items').update(payload).eq('id',editingId).select());
   } else {
-    items.push({ id: uid(), brand, color, model, barcode, printers, quantity, minThreshold });
+    ({data:[data], error} = await supabase.from('toner_items').insert(payload).select());
   }
-
-  closeModal();
-  render();
-  await saveItems();
+  if(error){ alert(error.message); return; }
+  if(editingId){ Object.assign(items.find(i=>i.id===editingId), data); }
+  else items.push(data);
+  closeModal(); render();
 }
 
 /* ---------- barcode scanner ---------- */
@@ -1070,9 +1071,10 @@ async function handleScannedCode(code){
 
   if(existing){
     beep('match');
-    existing.quantity = (Number(existing.quantity)||0) + 1;
+    const { data, error } = await supabase.rpc('adjust_toner_stock', {p_toner_id:existing.id,p_delta:1,p_event_type:'scan',p_barcode:code});
+    if(error){ scanLocked=false; setScanStatus('Stock update failed: '+error.message,false); return; }
+    Object.assign(existing, data);
     scanHistory.push({ id: existing.id, brand: existing.brand, model: existing.model });
-    await saveItems();
     render();
     refreshTally();
     setScanStatus(`+1 ${existing.brand} ${existing.model} → now ${existing.quantity} in stock. Keep scanning…`, true);
@@ -1099,8 +1101,9 @@ async function undoLastScan(){
   const last = scanHistory.pop();
   const item = items.find(i => i.id === last.id);
   if(item){
-    item.quantity = Math.max(0, (Number(item.quantity)||0) - 1);
-    await saveItems();
+    const { data, error } = await supabase.rpc('adjust_toner_stock', {p_toner_id:item.id,p_delta:-1,p_event_type:'undo',p_barcode:item.barcode || null});
+    if(error){ alert(error.message); return; }
+    Object.assign(item, data);
     render();
     beep('undo');
     setScanStatus(`Removed 1 ${last.brand} ${last.model} → now ${item.quantity}. Keep scanning…`, false);
@@ -1119,6 +1122,37 @@ function closeScanner(){
   if(overlay) overlay.remove();
 }
 
+function renderLogin(){
+  return `<header><div><h1>Toner Stock</h1><div class="sub">Shared HP &amp; Kyocera inventory</div></div></header>
+  <div class="modal" style="margin:40px auto;display:block">
+    <h2>Sign in</h2>
+    <div class="field"><label>EMAIL</label><input id="auth-email" type="email" autocomplete="email"></div>
+    <div class="field"><label>PASSWORD</label><input id="auth-password" type="password" autocomplete="current-password"></div>
+    <div class="modal-actions"><button class="btn-secondary" onclick="signUp()">CREATE ACCOUNT</button><button class="btn-primary" onclick="signIn()">SIGN IN</button></div>
+    <div class="field-hint" style="margin-top:12px">Use the same account on your iPhone and other devices to share stock.</div>
+  </div>`;
+}
+async function signIn(){
+  const email=document.getElementById('auth-email').value.trim(), password=document.getElementById('auth-password').value;
+  const {error}=await supabase.auth.signInWithPassword({email,password});
+  if(error) alert(error.message); else await loadItems();
+}
+async function signUp(){
+  const email=document.getElementById('auth-email').value.trim(), password=document.getElementById('auth-password').value;
+  if(password.length<6){alert('Password must be at least 6 characters.');return;}
+  const {error}=await supabase.auth.signUp({email,password});
+  if(error) alert(error.message); else alert('Account created. Check your email if confirmation is required, then sign in.');
+}
+async function signOut(){ await supabase.auth.signOut(); currentUser=null; items=[]; render(); }
+async function exportCSV(){
+  const {data,error}=await supabase.from('toner_items').select('*').order('brand').order('model');
+  if(error){alert(error.message);return;}
+  const cols=['brand','model','color','barcode','printers','quantity','min_threshold','updated_at'];
+  const csv=[cols.join(','),...data.map(r=>cols.map(k=>`"${String(r[k]??'').replaceAll('"','""')}"`).join(','))].join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='toner-stock.csv'; a.click(); URL.revokeObjectURL(a.href);
+}
+supabase.auth.onAuthStateChange((_event, session)=>{ currentUser=session?.user||null; if(currentUser && !loaded) loadItems(); });
 loadItems();
 </script>
 </body>
