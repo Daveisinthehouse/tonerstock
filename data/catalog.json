@@ -1,0 +1,280 @@
+{
+  "updated": "2026-09-19",
+  "note": "Verified current manufacturer part numbers found on official HP/Kyocera product pages. These are supply/managed part numbers, not guaranteed EAN/UPC barcodes.",
+  "sources": [
+    "https://support.hp.com/gb-en/product/product-specs/hp-laserjet-managed-mfp-e731-printer-series/model/38350989",
+    "https://support.hp.com/us-en/product/product-specs/hp-color-laserjet-managed-mfp-e785-printer-series/38348094",
+    "https://support.hp.com/emea_africa-en/product/product-specs/hp-color-laserjet-managed-mfp-e786z-printer-series/2101127726",
+    "https://support.hp.com/us-en/product/product-specs/hp-color-laserjet-managed-mfp-e826z-printer-series/model/2101127731",
+    "https://support.hp.com/us-en/product/product-specs/hp-color-laserjet-managed-mfp-e877z-printer-series/2101127729",
+    "https://www.kyoceradocumentsolutions.com/asia/en/products/mfp/ecosys-m5526cdw/option.html"
+  ],
+  "items": [
+    {
+      "brand": "HP",
+      "model": "W9064MC",
+      "color": "Black",
+      "printers": "LaserJet Managed MFP E731",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9065MC",
+      "color": "Black",
+      "printers": "LaserJet Managed MFP E731",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9084MC",
+      "color": "Black",
+      "printers": "LaserJet Managed MFP E826dn; E826z; E826 Core",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9085MC",
+      "color": "Black",
+      "printers": "LaserJet Managed MFP E826dn; E826z; E826 Core",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9120MC",
+      "color": "Black",
+      "printers": "Color LaserJet Managed MFP E785",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9121MC",
+      "color": "Cyan",
+      "printers": "Color LaserJet Managed MFP E785",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9123MC",
+      "color": "Magenta",
+      "printers": "Color LaserJet Managed MFP E785",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9130MC",
+      "color": "Black",
+      "printers": "Color LaserJet Managed MFP E785",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9131MC",
+      "color": "Cyan",
+      "printers": "Color LaserJet Managed MFP E785",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9132MC",
+      "color": "Yellow",
+      "printers": "Color LaserJet Managed MFP E785",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9133MC",
+      "color": "Magenta",
+      "printers": "Color LaserJet Managed MFP E785",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9140MC",
+      "color": "Black",
+      "printers": "Color LaserJet Managed MFP E786z",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9141MC",
+      "color": "Cyan",
+      "printers": "Color LaserJet Managed MFP E786z",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9142MC",
+      "color": "Yellow",
+      "printers": "Color LaserJet Managed MFP E786z",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9143MC",
+      "color": "Magenta",
+      "printers": "Color LaserJet Managed MFP E786z",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9150MC",
+      "color": "Black",
+      "printers": "Color LaserJet Managed MFP E786z",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9151MC",
+      "color": "Cyan",
+      "printers": "Color LaserJet Managed MFP E786z",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9152MC",
+      "color": "Yellow",
+      "printers": "Color LaserJet Managed MFP E786z",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9153MC",
+      "color": "Magenta",
+      "printers": "Color LaserJet Managed MFP E786z",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9160MC",
+      "color": "Black",
+      "printers": "Color LaserJet Managed MFP E877z; E877dn",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9161MC",
+      "color": "Cyan",
+      "printers": "Color LaserJet Managed MFP E877z; E877dn",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9162MC",
+      "color": "Yellow",
+      "printers": "Color LaserJet Managed MFP E877z; E877dn",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9163MC",
+      "color": "Magenta",
+      "printers": "Color LaserJet Managed MFP E877z; E877dn",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9170MC",
+      "color": "Black",
+      "printers": "Color LaserJet Managed MFP E877z; E877dn",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9171MC",
+      "color": "Cyan",
+      "printers": "Color LaserJet Managed MFP E877z; E877dn",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9172MC",
+      "color": "Yellow",
+      "printers": "Color LaserJet Managed MFP E877z; E877dn",
+      "source": "HP official"
+    },
+    {
+      "brand": "HP",
+      "model": "W9173MC",
+      "color": "Magenta",
+      "printers": "Color LaserJet Managed MFP E877z; E877dn",
+      "source": "HP official"
+    },
+    {
+      "brand": "Kyocera",
+      "model": "TK-5234K",
+      "color": "Black",
+      "printers": "ECOSYS M5521cdn; M5521cdw; M5526cdn; M5526cdw",
+      "source": "Kyocera official"
+    },
+    {
+      "brand": "Kyocera",
+      "model": "TK-5234C",
+      "color": "Cyan",
+      "printers": "ECOSYS M5521cdn; M5521cdw; M5526cdn; M5526cdw",
+      "source": "Kyocera official"
+    },
+    {
+      "brand": "Kyocera",
+      "model": "TK-5234M",
+      "color": "Magenta",
+      "printers": "ECOSYS M5521cdn; M5521cdw; M5526cdn; M5526cdw",
+      "source": "Kyocera official"
+    },
+    {
+      "brand": "Kyocera",
+      "model": "TK-5234Y",
+      "color": "Yellow",
+      "printers": "ECOSYS M5521cdn; M5521cdw; M5526cdn; M5526cdw",
+      "source": "Kyocera official"
+    },
+    {
+      "brand": "Kyocera",
+      "model": "TK-5244K",
+      "color": "Black",
+      "printers": "ECOSYS M5521cdn; M5521cdw; M5526cdn; M5526cdw",
+      "source": "Kyocera official"
+    },
+    {
+      "brand": "Kyocera",
+      "model": "TK-5244C",
+      "color": "Cyan",
+      "printers": "ECOSYS M5521cdn; M5521cdw; M5526cdn; M5526cdw",
+      "source": "Kyocera official"
+    },
+    {
+      "brand": "Kyocera",
+      "model": "TK-5244M",
+      "color": "Magenta",
+      "printers": "ECOSYS M5521cdn; M5521cdw; M5526cdn; M5526cdw",
+      "source": "Kyocera official"
+    },
+    {
+      "brand": "Kyocera",
+      "model": "TK-5244Y",
+      "color": "Yellow",
+      "printers": "ECOSYS M5521cdn; M5521cdw; M5526cdn; M5526cdw",
+      "source": "Kyocera official"
+    },
+    {
+      "brand": "Kyocera",
+      "model": "TK-1172",
+      "color": "Black",
+      "printers": "ECOSYS M2040dn; M2540dw; M2640idw",
+      "source": "Kyocera official listing"
+    },
+    {
+      "brand": "Kyocera",
+      "model": "TK-1152",
+      "color": "Black",
+      "printers": "ECOSYS M2635dw",
+      "source": "Kyocera official listing"
+    },
+    {
+      "brand": "Kyocera",
+      "model": "TK-3162",
+      "color": "Black",
+      "printers": "ECOSYS M3145idn; M3645idn",
+      "source": "Kyocera official listing"
+    }
+  ]
+}
