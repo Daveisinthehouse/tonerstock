@@ -620,7 +620,7 @@ function uid(){
 
 function statusOf(item){
   if(item.quantity <= 0) return 'out';
-  if(item.quantity <= item.minThreshold) return 'low';
+  if(item.quantity <= item.min_threshold) return 'low';
   return 'ok';
 }
 
@@ -756,7 +756,7 @@ function renderTag(item){
             <button onclick="adjustQty('${item.id}', -1)">−</button>
             <div>
               <div class="qty">${item.quantity}</div>
-              <div class="qty-lbl">on hand · min ${item.minThreshold}</div>
+              <div class="qty-lbl">on hand · min ${item.min_threshold}</div>
             </div>
             <button onclick="adjustQty('${item.id}', 1)">+</button>
           </div>
@@ -828,7 +828,7 @@ function openModal(id, prefillBarcode){
         </div>
         <div class="field">
           <label>REORDER AT</label>
-          <input id="f-min" type="number" min="0" value="${item ? item.minThreshold : 1}">
+          <input id="f-min" type="number" min="0" value="${item ? item.min_threshold : 1}">
         </div>
       </div>
       <div class="modal-actions">
