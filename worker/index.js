@@ -13,7 +13,11 @@ async function userFor(request, env) {
   const response = await fetch(env.SUPABASE_URL.replace(/\/$/, "") + "/auth/v1/user", {
     headers: { apikey: env.SUPABASE_ANON_KEY, Authorization: authorization }
   });
-  if (!response.ok) return null;
+  if (!response.ok) {
+    let detail = "";
+    try { const body = await response.json(); detail = body.message || body.msg || body.error_description || ""; } catch (_) {}
+    throw new Error(`Supabase rejected the sign-in token (${response.status})${detail ? `: ${detail}` : ""}`);
+  }
   return response.json();
 }
 const uid = () => crypto.randomUUID();
@@ -29,7 +33,7 @@ export default {
     if (!["/toner_items", "/rpc/adjust_toner_stock", "/stock_events"].includes(path)) return error("Not found", 404);
     if (!env.SUPABASE_URL || !env.SUPABASE_ANON_KEY) return error("Worker auth configuration missing", 500);
     let user;
-    try { user = await userFor(request, env); } catch (_) { return error("Could not validate sign-in", 502); }
+    try { user = await userFor(request, env); } catch (e) { return error(String(e.message || "Could not validate sign-in"), 502); }
     if (!user || !user.id) return error("Please sign in again", 401);
     try {
       if (path === "/toner_items" && request.method === "GET") {
