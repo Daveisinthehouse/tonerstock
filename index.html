@@ -611,7 +611,7 @@ const COLOR_HEX = {
   'N/A': '#999'
 };
 
-async function loadItems(){loaded=false;render();try{if(!await ensureSession()){loaded=true;render();return;}const r=await apiFetch('/toner_items?select=*&order=brand.asc,model.asc');if(r.error){loaded=true;document.getElementById('app').innerHTML='<div class="empty"><div class="big">Database connection problem</div><div>'+escapeHtml(r.error.message)+'</div><div style="margin-top:12px"><button class="add-btn" onclick="loadItems()">RETRY</button></div></div>';return;}items=r.data||[];loaded=true;render();}catch(e){loaded=true;document.getElementById('app').innerHTML='<div class="empty"><div class="big">Database connection problem</div><div>'+escapeHtml(e.message)+'</div></div>';}}
+async function loadItems(){loaded=false;render();try{if(!await ensureSession()){loaded=true;render();return;}const r=await apiFetch('/toner_items?select=*&order=brand.asc,model.asc');if(r.error){if(r.status===401){saveSession(null);loaded=true;render();return;}loaded=true;document.getElementById('app').innerHTML='<div class="empty"><div class="big">Database connection problem</div><div>'+escapeHtml(r.error.message)+'</div><div style="margin-top:12px"><button class="add-btn" onclick="loadItems()">RETRY</button></div></div>';return;}items=r.data||[];loaded=true;render();}catch(e){loaded=true;document.getElementById('app').innerHTML='<div class="empty"><div class="big">Database connection problem</div><div>'+escapeHtml(e.message)+'</div></div>';}}
 async function saveItems(){return true;}
 
 function uid(){
