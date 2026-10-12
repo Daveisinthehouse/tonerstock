@@ -5,4 +5,4 @@ compatibility_date = "2026-10-12"
 [[d1_databases]]
 binding = "DB"
 database_name = "tonerstock"
-database_id = "REPLACE_WITH_YOUR_TONERSTOCK_D1_DATABASE_ID"
+database_id = "e880425f-fba3-48ba-81de-e5bbc7e90125"
