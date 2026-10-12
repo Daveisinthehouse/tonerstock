@@ -6,3 +6,6 @@ compatibility_date = "2026-10-12"
 binding = "DB"
 database_name = "tonerstock"
 database_id = "e880425f-fba3-48ba-81de-e5bbc7e90125"
+
+[vars]
+SUPABASE_URL = "https://itfdphlhftknnuuarfud.supabase.co"
